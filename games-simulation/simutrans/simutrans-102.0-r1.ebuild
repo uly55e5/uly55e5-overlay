@@ -16,7 +16,7 @@ SLOT="0"
 
 KEYWORDS="amd64 x86"
 
-IUSE="allegro sdl"
+IUSE="allegro +sdl +pak64"
 
 DEPEND="sys-libs/zlib
 		media-libs/libpng
@@ -28,7 +28,8 @@ DEPEND="sys-libs/zlib
 
 RESTRICT="mirror"
 
-RDEPEND=""
+RDEPEND="pak64? (
+			games-simulation/simutrans-pak64 )"
 
 S=${WORKDIR}
 
