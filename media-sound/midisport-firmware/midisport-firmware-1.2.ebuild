@@ -16,7 +16,7 @@ KEYWORDS="~amd64 ~x86"
 
 RESTRICT="mirror"
 
-DEPEND="sys-apps/udev
+DEPEND="sys-fs/udev
 	    sys-apps/fxload "
 
 src_unpack() {
