@@ -1,0 +1,16 @@
+GKHOME=/opt/usf
+gkhome=/opt/usf
+GKLIB=/opt/usf/lib
+gklib=/opt/usf/lib
+GKPATH=/opt/usf/omac
+gkpath=/opt/usf/omac
+NUMMAPS=2
+NUMMASKS=4
+MAPSIZE=3000000
+MASKSIZE=2000000
+NUMSETS=5
+SETSIZE=200000
+MAXHITS=1000
+GKBUFFER=1000000
+OSYM=/opt/usf/osym
+osym=/opt/usf/osym
