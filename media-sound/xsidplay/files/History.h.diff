@@ -1,0 +1,10 @@
+--- src/HistoryDialog.h	2002-05-12 23:05:58.000000000 +0200
++++ src/HistoryDialog.h	2006-06-21 20:59:19.000000000 +0200
+@@ -23,6 +23,7 @@
+ #include "HistoryDialogData.h"
+ #include "HistoryItem.h"
+ #include "HistoryFile.h"
++class HistoryFile;
+ 
+ class HistoryDialog : public HistoryDialogData
+ {
