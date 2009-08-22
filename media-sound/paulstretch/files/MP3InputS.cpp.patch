@@ -1,0 +1,10 @@
+--- Input/MP3InputS.cpp	2009-04-23 21:12:00.000000000 +0200
++++ Input/MP3InputS.cpp.new	2009-05-24 12:00:29.000000000 +0200
+@@ -20,6 +20,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include "MP3InputS.h"
+ using namespace std;
+ 
