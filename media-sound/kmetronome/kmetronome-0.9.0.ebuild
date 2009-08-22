@@ -13,7 +13,7 @@ SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
 
-DEPEND="=kde-base/kdebase-meta-4*"
+DEPEND="=kde-base/kdelibs-4*"
 RDEPEND="$DEPEND"
 
 RESTRICT="mirror"
