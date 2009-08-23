@@ -1,0 +1,9 @@
+#!/bin/bash
+export LD_LIBRARY_PATH="/opt/#LZPATH#:${LD_LIBRARY_PATH}"
+LZCLASSPATH=""
+cd /opt/#LZPATH#
+for i in `ls *.jar`; do 
+	LZCLASSPATH=${LZCLASSPATH}:${i}
+done; 
+java -cp ${LZCLASSPATH} com.lightcrafts.platform.linux.LinuxLauncher
+
