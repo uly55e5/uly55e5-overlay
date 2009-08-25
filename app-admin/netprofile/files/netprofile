@@ -1,0 +1,68 @@
+#!/sbin/runscript
+# Copyright 2007-2008 Roy Marples <roy@marples.name>
+# All rights reserved. Released under the 2-clause BSD license.
+
+description="Writes configuration files for a specific network."
+
+depend()
+{
+	need localmount
+	before net 
+	keyword notimeout
+}
+
+_set_files()
+{
+	if [ -e /etc/conf.d/netprofile-files ]; then
+		for FILE in $(grep ^/ /etc/conf.d/netprofile-files); do			
+			if [ -e ${FILE} -a -e  ${FILE}.${NETPROFILE} ]; then
+				cp ${FILE} ${FILE}.netprofile.bak
+				#einfo "Copied ${FILE} to ${FILE}.netprofile.bak"
+			fi
+			if [ -e ${FILE}.${NETPROFILE} ]; then
+				if [ -e ${FILE} ]; then
+					rm ${FILE}
+				fi
+				ln -s ${FILE}.${NETPROFILE} ${FILE} 
+			fi
+			if [ ! -e $FILE ]; then
+				ewarn "${FILE} and ${FILE}.${NETPROFILE} do not exist!"
+			fi
+		done
+	fi
+}
+
+_restore_files()
+{
+	if [ -e /etc/conf.d/netprofile-files ]; then
+		for FILE in $(grep ^/ /etc/conf.d/netprofile-files); do
+			if [ -e ${FILE}.netprofile.bak ]; then
+				rm ${FILE}
+				mv ${FILE}.netprofile.bak ${FILE}
+			fi
+		done
+	fi
+}
+
+start()
+{       	
+	ebegin "Starting NetProfile"
+	if [ ${NETPROFILE} ]; then
+		echo "Switching to Network" ${NETPROFILE}
+		_set_files
+	else
+		echo "No Network selected!"
+	fi
+
+	eend $? "Failed to start Network Profile"
+}
+
+stop()
+{
+	ebegin "Stopping NetProfile"
+
+	_restore_files
+
+	eend $? $"Failed to stop NetProfile"
+}
+

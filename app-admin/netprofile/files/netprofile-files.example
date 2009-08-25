@@ -1,0 +1,15 @@
+# This file contains a list of FILES which are overwritten by the
+# by the netprofile service with FILE.NETPROFILE if it exists.
+# The original FILE is copied to FILE.bak and restored at stop.
+# Set the NETPROFILE variable in your lilo.conf or menu.lst (for grub).
+
+/etc/resolv.conf
+/etc/fstab
+/etc/yp.conf
+/etc/hosts
+/etc/networks
+/etc/wpa_supplicant/wpa_supplicant.conf
+/etc/samba/smb.conf
+/etc/conf.d/domainname
+/etc/conf.d/net
+/etc/conf.d/ypbind
