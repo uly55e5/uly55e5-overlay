@@ -13,7 +13,7 @@ SLOT="0"
 KEYWORDS="~x86 ~amd64"
 IUSE=""
 
-DEPEND="dev-lang/python:2.5
+DEPEND="dev-lang/python
 		>=dev-python/pygtk-2.10
         >=dev-python/gst-python-0.10
 		>=media-libs/gstreamer-0.10
