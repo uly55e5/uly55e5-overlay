@@ -7,8 +7,8 @@ inherit gst-plugins-bad
 KEYWORDS="~x86 ~amd64"
 IUSE=""
 
-RDEPEND=">=media-libs/gst-plugins-base-0.10.22
-	>=media-libs/gstreamer-0.10.22
+RDEPEND=">=media-libs/gst-plugins-base-0.10.23
+	>=media-libs/gstreamer-0.10.23
 	>=media-libs/libsoundtouch-1.3.1"
 DEPEND="${RDEPEND}
 	dev-util/pkgconfig"
