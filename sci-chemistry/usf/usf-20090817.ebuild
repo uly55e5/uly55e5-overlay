@@ -50,6 +50,7 @@ RDEPEND=""
 S="${WORKDIR}"
 
 RESTRICT="mirror"
+RESTRICT="live"
 
 USFDIR="/opt/usf"
 
