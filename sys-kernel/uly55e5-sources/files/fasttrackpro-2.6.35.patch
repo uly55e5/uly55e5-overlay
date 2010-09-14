@@ -1,0 +1,63 @@
+diff -rupN /sound/usb/card.c /sound/usb/card.c
+--- /sound/usb/card.c
++++ /sound/usb/card.c
+@@ -209,6 +209,8 @@ static int snd_usb_create_streams(struct
+ 						 NULL, UAC_HEADER);
+ 	altsd = get_iface_desc(host_iface);
+ 	protocol = altsd->bInterfaceProtocol;
++                if (chip->usb_id == USB_ID(0x0763, 0x2080) || chip->usb_id == USB_ID(0x0763, 0x2081))
++		protocol = UAC_VERSION_1;
+ 
+ 	if (!control_header) {
+ 		snd_printk(KERN_ERR "cannot find UAC_HEADER\n");
+diff -rupN /sound/usb/endpoint.c /sound/usb/endpoint.c
+--- /sound/usb/endpoint.c
++++ /sound/usb/endpoint.c
+@@ -252,6 +252,8 @@ int snd_usb_parse_audio_endpoints(struct
+ 		alts = &iface->altsetting[i];
+ 		altsd = get_iface_desc(alts);
+ 		protocol = altsd->bInterfaceProtocol;
++                if (chip->usb_id == USB_ID(0x0763, 0x2080) || chip->usb_id == USB_ID(0x0763, 0x2081))
++		protocol = UAC_VERSION_1;
+ 		/* skip invalid one */
+ 		if ((altsd->bInterfaceClass != USB_CLASS_AUDIO &&
+ 		     altsd->bInterfaceClass != USB_CLASS_VENDOR_SPEC) ||
+@@ -403,11 +405,15 @@ int snd_usb_parse_audio_endpoints(struct
+ 			break;
+ 		case USB_ID(0x041e, 0x3020): /* Creative SB Audigy 2 NX */
+ 		case USB_ID(0x0763, 0x2003): /* M-Audio Audiophile USB */
+-		case USB_ID(0x0763, 0x2080): /* M-Audio Fast Track Ultra 8 */
+-		case USB_ID(0x0763, 0x2081): /* M-Audio Fast Track Ultra 8R */
+ 			/* doesn't set the sample rate attribute, but supports it */
+ 			fp->attributes |= UAC_EP_CS_ATTR_SAMPLE_RATE;
+ 			break;
++		case USB_ID(0x0763, 0x2080): /* M-Audio Fast Track Ultra   */
++		case USB_ID(0x0763, 0x2081): /* M-Audio Fast Track Ultra 8R */
++			/* force playback sync to adaptive only and turn off async*/
++			if (stream == SNDRV_PCM_STREAM_PLAYBACK)
++				fp->ep_attr = 0x09;
++			break;
+ 		case USB_ID(0x047f, 0x0ca1): /* plantronics headset */
+ 		case USB_ID(0x077d, 0x07af): /* Griffin iMic (note that there is
+ 						an older model 77d:223) */
+diff -rupN /sound/usb/format.c /sound/usb/format.c
+--- /sound/usb/format.c
++++ /sound/usb/format.c
+@@ -353,6 +353,8 @@ static int parse_audio_format_i(struct s
+ 	struct usb_interface_descriptor *altsd = get_iface_desc(iface);
+ 	int protocol = altsd->bInterfaceProtocol;
+ 	int pcm_format, ret;
++                if (chip->usb_id == USB_ID(0x0763, 0x2080) || chip->usb_id == USB_ID(0x0763, 0x2081))
++		protocol = UAC_VERSION_1;
+ 
+ 	if (fmt->bFormatType == UAC_FORMAT_TYPE_III) {
+ 		/* FIXME: the format type is really IECxxx
+@@ -415,6 +417,8 @@ static int parse_audio_format_ii(struct 
+ 	int brate, framesize, ret;
+ 	struct usb_interface_descriptor *altsd = get_iface_desc(iface);
+ 	int protocol = altsd->bInterfaceProtocol;
++                if (chip->usb_id == USB_ID(0x0763, 0x2080) || chip->usb_id == USB_ID(0x0763, 0x2081))
++		protocol = UAC_VERSION_1;
+ 
+ 	switch (format) {
+ 	case UAC_FORMAT_TYPE_II_AC3:
