@@ -3,6 +3,8 @@
 
 inherit games
 
+EAPI="1"
+
 MYPV="102-2-2"
 
 DESCRIPTION="A free Transport Tycoon clone"
