@@ -37,7 +37,7 @@ SRC_URI="${KERNEL_URI} ${PF_URI}" # \${EXPERIMENTAL_URI}
 KEYWORDS="-* ~amd64 ~ppc ~ppc64 ~x86"
 IUSE="" # experimental
 
-KV_FULL="${PVR/_p/-pf}"
+KV_FULL="${PVR/_p/-uly55e5-p}"
 S="${WORKDIR}"/linux-"${KV_FULL}"
 
 UNIPATCH_LIST="${UNIPATCH_LIST}
