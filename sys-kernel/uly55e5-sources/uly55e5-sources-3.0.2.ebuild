@@ -38,7 +38,7 @@ KEYWORDS="-* ~amd64 ~ppc ~ppc64 ~x86"
 IUSE="" # experimental
 
 KV_FULL="${PVR}"
-S="${WORKDIR}"/linux-"${KV_FULL}"
+S="${WORKDIR}"/linux-"${KV_FULL}-uly55e5"
 
 UNIPATCH_LIST="${UNIPATCH_LIST}
                ${FILESDIR}/fasttrackpro-${CKV}.patch"
