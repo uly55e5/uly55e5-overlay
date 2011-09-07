@@ -12,7 +12,7 @@ LICENSE="GPL"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
-DEPEND="x11-libs/qt:4
+DEPEND="kde-base/kdebase-meta:4
 		media-libs/libsidplay:2"
 S=${WORKDIR}/${PN}
 
