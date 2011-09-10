@@ -12,3 +12,9 @@ RDEPEND=">=media-libs/gst-plugins-base-0.10.23
 	>=media-libs/libsoundtouch-1.3.1"
 DEPEND="${RDEPEND}
 	dev-util/pkgconfig"
+
+src_unpack() {
+	unpack ${A}
+	cd ${S}
+	sed -ie "s/soundtouch-1.4/soundtouch/g" configure
+}
