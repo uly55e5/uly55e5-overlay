@@ -70,7 +70,7 @@ src_install() {
 	games_make_wrapper ${PN} ./sim "${gamesdir}"
 	rm ${PN}/${PN}
 	exeinto ${gamesdir}
-	doexe sim
+	doexe build/default/sim
 	dodoc ${PN}/*.txt
 	rm ${PN}/*.txt
 	mv ${PN}/* "${D}/${gamesdir}/" || die "copy simutrans failed"
