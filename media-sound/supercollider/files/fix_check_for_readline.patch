@@ -1,0 +1,13 @@
+--- SConstruct.orig	2012-01-22 21:09:38.604502854 +0100
++++ SConstruct	2012-01-22 21:10:44.668496428 +0100
+@@ -582,8 +582,8 @@
+ 
+ # readline
+ if env['LANG'] and env['READLINE'] and env['GPL3']:
+-    if conf.CheckCHeader('readline/readline.h'):
+-        libraries['readline'] = Environment(
++    if conf.CheckLibWithHeader ('readline', ['stdio.h', 'readline/readline.h', 'readline/history.h'], 'c', 'add_history("testline");'):
++	libraries['readline'] = Environment(
+              LINKFLAGS = '-lreadline',
+         )
+     else:
