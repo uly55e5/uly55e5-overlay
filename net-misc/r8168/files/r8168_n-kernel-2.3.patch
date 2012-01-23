@@ -1,0 +1,11 @@
+--- src/r8168_n.c.orig	2012-01-23 22:53:47.968555323 +0100
++++ src/r8168_n.c	2012-01-23 23:25:27.783721311 +0100
+@@ -14282,7 +14282,7 @@
+ 
+ 		txd = tp->TxDescArray + entry;
+ 		len = frag->size;
+-		addr = ((void *) page_address(frag->page)) + frag->page_offset;
++		addr = ((void *) page_address(&frag->page)) + frag->page_offset;
+ 		mapping = pci_map_single(tp->pci_dev, addr, len, PCI_DMA_TODEVICE);
+ 
+ 		/* anti gcc 2.95.3 bugware (sic) */
