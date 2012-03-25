@@ -1,0 +1,10 @@
+--- utils/csv.cc.orig	2012-03-26 00:25:26.367650195 +0200
++++ utils/csv.cc	2012-03-26 00:25:51.804325270 +0200
+@@ -6,6 +6,7 @@
+  */
+ 
+ #include <cstring>
++#include <stdlib.h>
+ #include <stdio.h>
+ #include <assert.h>
+ 
