@@ -1,0 +1,16 @@
+diff --git a/part/completion/katecompletionwidget.cpp b/part/completion/katecompletionwidget.cpp
+index 1adb80b..5b76018 100644
+--- a/part/completion/katecompletionwidget.cpp
++++ b/part/completion/katecompletionwidget.cpp
+@@ -680,7 +680,10 @@ void KateCompletionWidget::cursorPositionChanged( )
+ 
+       //kDebug()<<"range before _updateRange:"<< *range;
+       KTextEditor::Range rangeTE = range->toRange();
+-      range->setRange (_updateRange(model, view(),rangeTE));
++      KTextEditor::Range newRange = _updateRange(model, view(),rangeTE);
++      if(!m_completionRanges.contains(*it))
++        continue;
++      range->setRange (newRange);
+       //kDebug()<<"range after _updateRange:"<< *range;
+       QString currentCompletion = _filterString(model,view(), *range, view()->cursorPosition());
+       //kDebug()<<"after _filterString, currentCompletion="<< currentCompletion;
