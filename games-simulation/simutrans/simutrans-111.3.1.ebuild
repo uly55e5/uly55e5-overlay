@@ -1,14 +1,16 @@
 # Copyright 1999-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
+EAPI="4"
 
 inherit games
 
-MYPV="102-0"
+MYPV="${PV/./-}"
+MYPV="${MYPV/./-}"
 
 DESCRIPTION="A free Transport Tycoon clone"
 HOMEPAGE="http://simutrans.sourceforge.net/"
-SRC_URI="http://dfn.dl.sourceforge.net/sourceforge/simutrans/simutrans-src-${MYPV}.zip
-		 http://dfn.dl.sourceforge.net/sourceforge/simutrans/simulinux-${MYPV}.zip"
+SRC_URI="mirror://sourceforge/simutrans/simutrans/${MYPV}/simutrans-src-${MYPV}.zip
+		 mirror://sourceforge/simutrans/simutrans/${MYPV}/simulinux-${MYPV}.zip"
 
 LICENSE="as-is"
 
@@ -45,6 +47,7 @@ pkg_setup() {
 src_unpack() {
 	unpack ${A}
 	cd ${S}
+	epatch ${FILESDIR}/*.patch
 }
 
 src_compile() {
@@ -67,7 +70,7 @@ src_install() {
 	games_make_wrapper ${PN} ./sim "${gamesdir}"
 	rm ${PN}/${PN}
 	exeinto ${gamesdir}
-	doexe sim
+	doexe build/default/sim
 	dodoc ${PN}/*.txt
 	rm ${PN}/*.txt
 	mv ${PN}/* "${D}/${gamesdir}/" || die "copy simutrans failed"
