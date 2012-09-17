@@ -5,11 +5,11 @@ inherit games
 
 DESCRIPTION="Opening books for various chess engines."
 HOMEPAGE="http://jose-chess.sourceforge.net/index.html"
-SRC_URI="http://superb-west.dl.sourceforge.net/sourceforge/jose-chess/book_small.bin
-		http://superb-west.dl.sourceforge.net/sourceforge/jose-chess/book.bin
-		http://internap.dl.sourceforge.net/sourceforge/jose-chess/DCbook_large.zip
-		http://internap.dl.sourceforge.net/sourceforge/jose-chess/Performance.bin
-		http://superb-east.dl.sourceforge.net/sourceforge/jose-chess/Varied.bin"
+SRC_URI="mirror://sourceforge/jose-chess/book_small.bin
+		mirror://sourceforge/jose-chess/book.bin
+		mirror://sourceforge/jose-chess/DCbook_large.zip
+		mirror://sourceforge/jose-chess/Performance.bin
+		mirror://sourceforge/jose-chess/Varied.bin"
 
 S=${WORKDIR}
 
