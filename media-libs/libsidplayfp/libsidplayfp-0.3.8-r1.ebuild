@@ -17,7 +17,8 @@ IUSE="static-libs"
 DOCS=( AUTHORS NEWS README TODO )
 
 src_prepare() {
-	epatch ${FILESDIR}/emu-headers.patch || die 
+	epatch ${FILESDIR}/cia1.patch || die 
+	epatch ${FILESDIR}/resid.patch || die
 	# fix automagic. warning: modifying .ac triggers maintainer mode.
 	sed -i -e 's:doxygen:dIsAbLe&:' configure || die
 }
@@ -28,5 +29,7 @@ src_configure() {
 
 src_install() {
 	default
+	dosym ./ /usr/include/sidplayfp/builders/resid 
+	dosym ./ /usr/include/sidplayfp/builders/residfp 
 	prune_libtool_files
 }

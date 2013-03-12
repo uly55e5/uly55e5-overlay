@@ -1,0 +1,138 @@
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/mos6526/mos6526.cpp libsidplayfp-0.3.1/sidplayfp/mos6526/mos6526.cpp
+--- libsidplayfp-0.3.1-origin/sidplayfp/mos6526/mos6526.cpp	2011-09-18 11:30:01.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/mos6526/mos6526.cpp	2011-12-09 21:12:19.000000000 +0100
+@@ -282,6 +282,7 @@
+ 	clear();
+ 	icr = idr = 0;
+ 	memset(regs, 0, sizeof(regs));
++	last_ta = 0;
+ 
+ 	// Reset timers
+ 	timerA.reset();
+@@ -393,10 +394,18 @@
+ 		break;
+ 	case TAL:
+ 		timerA.latchLo(data);
++		// store last timer A value to calculate song speed
++                if (timerA.getTimer() != 0) {
++                  last_ta = timerA.getTimer();
++                }
+ 		break;
+ 	case TAH:
+ 		timerA.latchHi(data);
+-		break;
++	        // store last timer A value to calculate song speed
++                if (timerA.getTimer() != 0) {
++                  last_ta = timerA.getTimer();
++                }
++	        break;
+ 	case TBL:
+ 		timerB.latchLo(data);
+ 		break;
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/mos6526/mos6526.h libsidplayfp-0.3.1/sidplayfp/mos6526/mos6526.h
+--- libsidplayfp-0.3.1-origin/sidplayfp/mos6526/mos6526.h	2011-09-24 20:04:56.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/mos6526/mos6526.h	2011-12-09 20:09:20.000000000 +0100
+@@ -31,6 +31,7 @@
+ */
+ class Timer : private Event {
+ 
++  
+ protected:
+ 	static const int_least32_t CIAT_CR_START   = 0x01;
+ 	static const int_least32_t CIAT_STEP       = 0x04;
+@@ -296,6 +297,10 @@
+ 
+ private:
+ 	static const char *credit;
++	  
++public:
++        // The last timer A value to calculate song speed.
++        int last_ta;	
+ 
+ protected:
+ 	/**
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/player.h libsidplayfp-0.3.1/sidplayfp/player.h
+--- libsidplayfp-0.3.1-origin/sidplayfp/player.h	2011-09-24 09:53:12.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/player.h	2011-12-09 20:03:38.000000000 +0100
+@@ -404,6 +404,9 @@
+                                 { cpu.debug (enable, out); }
+     void           mute         (int voice, bool enable);
+     const char    *error        (void) const { return m_errorString; }
++    int            cia1_last_ta (void) { if (m_info.environment == sid2_envR) return cia.last_ta;
++                                         else return sid6526.last_ta;
++                                       }  
+ };
+ 
+ 
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/sid6526/sid6526.cpp libsidplayfp-0.3.1/sidplayfp/sid6526/sid6526.cpp
+--- libsidplayfp-0.3.1-origin/sidplayfp/sid6526/sid6526.cpp	2011-09-18 11:30:03.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/sid6526/sid6526.cpp	2011-12-09 20:22:50.000000000 +0100
+@@ -101,6 +101,7 @@
+     locked = false;
+     ta   = ta_latch = m_count;
+     cra  = 0;
++    last_ta = 0;    
+     // Initialise random number generator
+     if (seed)
+         rnd = 0;
+@@ -151,9 +152,19 @@
+ 
+     switch (addr)
+     {
+-    case 0x4: endian_16lo8 (ta_latch, data); break;
++    case 0x4:
++        endian_16lo8 (ta_latch, data);
++	// store last timer A value to calculate song speed
++        if (ta_latch != 0) {
++          last_ta = ta_latch;
++        }
++	break;
+     case 0x5:
+         endian_16hi8 (ta_latch, data);
++        // store last timer A value to calculate song speed
++        if (ta_latch != 0) {
++          last_ta = ta_latch;
++        }
+         if (!(cra & 0x01)) // Reload timer if stopped
+             ta = ta_latch;
+     break;
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/sid6526/sid6526.h libsidplayfp-0.3.1/sidplayfp/sid6526/sid6526.h
+--- libsidplayfp-0.3.1-origin/sidplayfp/sid6526/sid6526.h	2011-09-18 11:30:03.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/sid6526/sid6526.h	2011-12-09 20:20:40.000000000 +0100
+@@ -46,6 +46,9 @@
+ 
+ class SID6526: public component, private Event
+ {
++public:
++    // The last timer A value to calculate song speed.
++    int last_ta;  
+ private:
+     static const char * const credit;
+ 
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/sidplay2.cpp libsidplayfp-0.3.1/sidplayfp/sidplay2.cpp
+--- libsidplayfp-0.3.1-origin/sidplayfp/sidplay2.cpp	2011-09-18 11:30:03.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/sidplay2.cpp	2011-12-09 20:05:33.000000000 +0100
+@@ -148,3 +148,6 @@
+ 
+ sid2_player_t sidplay2::state (void) const
+ {   return sidplayer.state (); }
++
++int sidplay2::cia1_last_ta(void) const 
++{  return sidplayer.cia1_last_ta (); }
+diff -Naur libsidplayfp-0.3.1-origin/sidplayfp/sidplay2.h libsidplayfp-0.3.1/sidplayfp/sidplay2.h
+--- libsidplayfp-0.3.1-origin/sidplayfp/sidplay2.h	2011-09-18 11:30:03.000000000 +0200
++++ libsidplayfp-0.3.1/sidplayfp/sidplay2.h	2011-12-09 20:00:33.000000000 +0100
+@@ -111,6 +111,13 @@
+     */
+     void           debug        (bool enable, FILE *out);
+     void           mute         (int voice, bool enable);
++    
++    /**
++     * Get last cia1 ta
++     * 
++     * @return last cia ta
++     */
++    int            cia1_last_ta (void) const;
+ 
+     //@{
+     /// Timer functions with respect to resolution returned by timebase

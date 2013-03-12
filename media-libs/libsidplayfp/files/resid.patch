@@ -1,0 +1,491 @@
+diff -Naur libsidplayfp-0.3.4-origin/builders/resid-builder/resid.cpp libsidplayfp-0.3.4/builders/resid-builder/resid.cpp
+--- libsidplayfp-0.3.4-origin/builders/resid-builder/resid.cpp	2012-03-06 22:43:32.000000000 +0100
++++ libsidplayfp-0.3.4/builders/resid-builder/resid.cpp	2012-05-06 17:21:12.000000000 +0200
+@@ -52,15 +52,20 @@
+     m_error = "N/A";
+ 
+     // Setup credits
+-    sprintf (p, "ReSID V%s Engine:", VERSION);
+-    p += strlen (p) + 1;
+-    strcpy  (p, "\t(C) 1999-2002 Simon White <sidplay2@yahoo.com>");
+-    p += strlen (p) + 1;
+-    sprintf (p, "MOS6581 (SID) Emulation (ReSID V%s):", resid_version_string);
+-    p += strlen (p) + 1;
+-    sprintf (p, "\t(C) 1999-2002 Dag Lem <resid@nimrod.no>");
+-    p += strlen (p) + 1;
+-    *p = '\0';
++    ///sprintf (p, "ReSID V%s Engine:", VERSION);
++    ///p += strlen (p) + 1;
++    ///strcpy  (p, "\t(C) 1999-2002 Simon White <sidplay2@yahoo.com>");
++    ///p += strlen (p) + 1;
++    ///sprintf (p, "MOS6581 (SID) Emulation (ReSID V%s):", resid_version_string);
++    ///p += strlen (p) + 1;
++    ///sprintf (p, "\t(C) 1999-2002 Dag Lem <resid@nimrod.no>");
++    ///p += strlen (p) + 1;
++    ///*p = '\0';
++    
++    sprintf (p, "\n\nReSID V%s Engine:\n"\
++                "(C) 1999-2002 Simon White <sidplay2@yahoo.com>\n"\
++                "MOS6581 (SID) Emulation (ReSID V%s):\n"\
++                "(C) 1999-2010 Dag Lem <resid@nimrod.no>", VERSION, resid_version_string);    
+ 
+     if (!&m_sid)
+     {
+@@ -242,3 +247,34 @@
+         m_sid.input(-32768);
+ */
+ }
++
++// one to one resid direct access
++void ReSID::direct_set_chip_model(RESID_NS::chip_model model) {
++  m_sid.set_chip_model(model);
++}
++
++void ReSID::direct_set_voice_mask(RESID_NS::reg4 mask) {
++  m_sid.set_voice_mask(mask);
++}
++
++void ReSID::direct_input(short sample) {
++  m_sid.input(sample);
++}
++
++void ReSID::direct_enable_filter(bool enable) {
++  m_sid.enable_filter(enable);
++}
++
++void ReSID::direct_adjust_filter_bias(double dac_bias) {
++  m_sid.adjust_filter_bias(dac_bias);
++}
++
++void ReSID::direct_enable_external_filter(bool enable) {
++  m_sid.enable_external_filter(enable);
++}
++
++bool ReSID::direct_set_sampling_parameters(double clock_freq, RESID_NS::sampling_method method,
++           double sample_freq, double pass_freq,
++           double filter_scale) {
++  return m_sid.set_sampling_parameters(clock_freq, method,sample_freq,pass_freq,filter_scale);
++}
+diff -Naur libsidplayfp-0.3.4-origin/builders/resid-builder/resid.cpp.orig libsidplayfp-0.3.4/builders/resid-builder/resid.cpp.orig
+--- libsidplayfp-0.3.4-origin/builders/resid-builder/resid.cpp.orig	1970-01-01 01:00:00.000000000 +0100
++++ libsidplayfp-0.3.4/builders/resid-builder/resid.cpp.orig	2012-03-06 22:43:32.000000000 +0100
+@@ -0,0 +1,244 @@
++/***************************************************************************
++                          c64sid.h  -  ReSid Wrapper for redefining the
++                                       filter
++                             -------------------
++    begin                : Fri Apr 4 2001
++    copyright            : (C) 2001 by Simon White
++    email                : s_a_white@email.com
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#include <cstring>
++#include <string.h>
++#include <stdio.h>
++
++#ifdef HAVE_CONFIG_H
++#  include "config.h"
++#endif
++
++#ifdef HAVE_EXCEPTIONS
++#   include <new>
++#endif
++
++#include "resid/siddefs.h"
++#include "resid/spline.h"
++#include "resid.h"
++#include "resid-emu.h"
++
++char ReSID::m_credit[];
++
++ReSID::ReSID (sidbuilder *builder)
++:sidemu(builder),
++ m_context(NULL),
++ m_phase(EVENT_CLOCK_PHI1),
++#ifdef HAVE_EXCEPTIONS
++ m_sid(*(new(std::nothrow) RESID_NS::SID)),
++#else
++ m_sid(*(new RESID_NS::SID)),
++#endif
++ m_status(true),
++ m_locked(false),
++ m_voiceMask(0x07)
++{
++    char *p = m_credit;
++    m_error = "N/A";
++
++    // Setup credits
++    sprintf (p, "ReSID V%s Engine:", VERSION);
++    p += strlen (p) + 1;
++    strcpy  (p, "\t(C) 1999-2002 Simon White <sidplay2@yahoo.com>");
++    p += strlen (p) + 1;
++    sprintf (p, "MOS6581 (SID) Emulation (ReSID V%s):", resid_version_string);
++    p += strlen (p) + 1;
++    sprintf (p, "\t(C) 1999-2002 Dag Lem <resid@nimrod.no>");
++    p += strlen (p) + 1;
++    *p = '\0';
++
++    if (!&m_sid)
++    {
++        m_error  = "RESID ERROR: Unable to create sid object";
++        m_status = false;
++        return;
++    }
++
++    m_buffer = new short[OUTPUTBUFFERSIZE];
++    m_bufferpos = 0;
++    reset (0);
++}
++
++ReSID::~ReSID ()
++{
++    if (&m_sid)
++        delete &m_sid;
++    delete[] m_buffer;
++}
++#if 0
++bool ReSID::filter (const sid_filter_t *filter)
++{
++    /*RESID_NS::short_point fc[0x802];
++    const RESID_NS::short_point *f0 = fc;
++    int   points = 0;
++
++    if (filter == NULL)
++    {   // Select default filter
++        //m_sid.fc_default (f0, points); //FIXME
++        return false;
++    }
++    else
++    {   // Make sure there are enough filter points and they are legal
++        points = filter->points;
++        if ((points < 2) || (points > 0x800))
++            return false;
++
++#ifdef DEBUG
++    printf("points: %d\n", filter->points);
++    for (int i=0; i<filter->points; ++i)
++    {
++        printf("point[%d,0]: %d\n", i, filter->cutoff[i][0]);
++        printf("point[%d,1]: %d\n", i, filter->cutoff[i][1]);
++    }
++#endif
++
++        {
++            const sid_fc_t  fstart = {-1, 0};
++            const sid_fc_t *fprev  = &fstart, *fin = filter->cutoff;
++            RESID_NS::short_point *fout = fc;
++            // Last check, make sure they are list in numerical order
++            // for both axis
++            while (points-- > 0)
++            {
++                if ((*fprev)[0] >= (*fin)[0])
++                    return false;
++                fout++;
++                (*fout)[0] = (short) (*fin)[0];
++                (*fout)[1] = (short) (*fin)[1];
++                fprev      = fin++;
++            }
++            // Updated ReSID interpolate requires we
++            // repeat the end points
++            (*(fout+1))[0] = (*fout)[0];
++            (*(fout+1))[1] = (*fout)[1];
++            fc[0][0] = fc[1][0];
++            fc[0][1] = fc[1][1];
++            points   = filter->points + 2;
++        }
++    }
++
++    // function from reSID
++    points--;
++    RESID_NS::interpolate (f0, f0 + points, RESID_NS::PointPlotter<short>(*fc), 1.0); //FIXME*/
++    return true;
++}
++#endif
++void ReSID::bias (const double dac_bias)
++{
++    m_sid.adjust_filter_bias(dac_bias);
++}
++
++// Standard component options
++void ReSID::reset (uint8_t volume)
++{
++    m_accessClk = 0;
++    m_sid.reset ();
++    m_sid.write (0x18, volume);
++}
++
++uint8_t ReSID::read (uint_least8_t addr)
++{
++    clock();
++    return m_sid.read (addr);
++}
++
++void ReSID::write (uint_least8_t addr, uint8_t data)
++{
++    clock();
++    m_sid.write (addr, data);
++}
++
++void ReSID::clock()
++{
++    RESID_NS::cycle_count cycles = m_context->getTime(m_accessClk, m_phase);
++    m_accessClk += cycles;
++    m_bufferpos += m_sid.clock(cycles, (short *) m_buffer + m_bufferpos, OUTPUTBUFFERSIZE - m_bufferpos, 1);
++}
++
++void ReSID::filter (bool enable)
++{
++    m_sid.enable_filter (enable);
++}
++
++void ReSID::sampling (float systemclock, float freq,
++        const sampling_method_t method, const bool fast)
++{
++    RESID_NS::sampling_method sampleMethod;
++    switch (method)
++    {
++    case SID2_INTERPOLATE:
++        sampleMethod = fast ? RESID_NS::SAMPLE_FAST : RESID_NS::SAMPLE_INTERPOLATE;
++        break;
++    case SID2_RESAMPLE_INTERPOLATE:
++        sampleMethod = fast ? RESID_NS::SAMPLE_RESAMPLE_FASTMEM : RESID_NS::SAMPLE_RESAMPLE;
++        break;
++    default:
++        m_status = false;
++        m_error = "Invalid sampling method.";
++        return;
++    }
++
++    if (! m_sid.set_sampling_parameters (systemclock, sampleMethod, freq)) {
++        m_status = false;
++        m_error = "Unable to set desired output frequency.";
++    }
++}
++
++void ReSID::voice (uint_least8_t num, bool mute)
++{
++    if (mute)
++        m_voiceMask &= ~(1<<num);
++    else
++        m_voiceMask |= 1<<num;
++
++    m_sid.set_voice_mask(m_voiceMask);
++}
++
++// Set execution environment and lock sid to it
++bool ReSID::lock (c64env *env)
++{
++    if (env == NULL)
++    {
++        if (!m_locked)
++            return false;
++        m_locked  = false;
++        m_context = NULL;
++    }
++    else
++    {
++        if (m_locked)
++            return false;
++        m_locked  = true;
++        m_context = &env->context ();
++    }
++    return true;
++}
++
++// Set the emulated SID model
++void ReSID::model (sid2_model_t model)
++{
++    if (model == SID2_MOS8580)
++        m_sid.set_chip_model (RESID_NS::MOS8580);
++    else
++        m_sid.set_chip_model (RESID_NS::MOS6581);
++/* MOS8580 + digi boost
++        m_sid.set_chip_model (RESID_NS::MOS8580);
++        m_sid.set_voice_mask(0x0f);
++        m_sid.input(-32768);
++*/
++}
+diff -Naur libsidplayfp-0.3.4-origin/builders/resid-builder/resid-emu.h libsidplayfp-0.3.4/builders/resid-builder/resid-emu.h
+--- libsidplayfp-0.3.4-origin/builders/resid-builder/resid-emu.h	2011-12-31 18:06:08.000000000 +0100
++++ libsidplayfp-0.3.4/builders/resid-builder/resid-emu.h	2012-05-06 17:26:53.000000000 +0200
+@@ -20,6 +20,7 @@
+ #endif
+ 
+ #include "resid/sid.h"
++#include "resid/siddefs.h"
+ 
+ //FIXME
+ #define RESID_NAMESPACE reSID
+@@ -45,7 +46,7 @@
+     bool          m_status;
+     bool          m_locked;
+     uint8_t       m_voiceMask;
+-    static char   m_credit[180];
++    static char   m_credit[350];
+ 
+ public:
+     ReSID  (sidbuilder *builder);
+@@ -75,4 +76,16 @@
+     void model    (sid2_model_t model);
+     // Must lock the SID before using the standard functions.
+     bool lock     (c64env *env);
++    
++public:
++    // one to one resid direct access
++    void direct_set_chip_model(RESID_NS::chip_model model);
++    void direct_set_voice_mask(RESID_NS::reg4 mask);
++    void direct_input(short sample);
++    void direct_enable_filter(bool enable);
++    void direct_adjust_filter_bias(double dac_bias);
++    void direct_enable_external_filter(bool enable);
++    bool direct_set_sampling_parameters(double clock_freq, RESID_NS::sampling_method method,
++           double sample_freq, double pass_freq = -1,
++           double filter_scale = 0.97);
+ };
+diff -Naur libsidplayfp-0.3.4-origin/builders/resid-builder/resid-emu.h.orig libsidplayfp-0.3.4/builders/resid-builder/resid-emu.h.orig
+--- libsidplayfp-0.3.4-origin/builders/resid-builder/resid-emu.h.orig	1970-01-01 01:00:00.000000000 +0100
++++ libsidplayfp-0.3.4/builders/resid-builder/resid-emu.h.orig	2011-12-31 18:06:08.000000000 +0100
+@@ -0,0 +1,78 @@
++/***************************************************************************
++                          resid-emu.h  -  ReSid Emulation
++                             -------------------
++    begin                : Fri Apr 4 2001
++    copyright            : (C) 2001 by Simon White
++    email                : s_a_white@email.com
++ ***************************************************************************/
++
++/***************************************************************************
++ *                                                                         *
++ *   This program is free software; you can redistribute it and/or modify  *
++ *   it under the terms of the GNU General Public License as published by  *
++ *   the Free Software Foundation; either version 2 of the License, or     *
++ *   (at your option) any later version.                                   *
++ *                                                                         *
++ ***************************************************************************/
++
++#ifdef HAVE_CONFIG_H
++#  include "config.h"
++#endif
++
++#include "resid/sid.h"
++
++//FIXME
++#define RESID_NAMESPACE reSID
++
++#ifdef RESID_NAMESPACE
++#   define RESID_NS ::RESID_NAMESPACE
++#else
++#   define RESID_NS
++#endif
++
++enum {
++    OUTPUTBUFFERSIZE = 32768
++};
++
++class ReSID: public sidemu
++{
++private:
++    EventContext *m_context;
++    event_phase_t m_phase;
++    class RESID_NS::SID &m_sid;
++    event_clock_t m_accessClk;
++    const  char  *m_error;
++    bool          m_status;
++    bool          m_locked;
++    uint8_t       m_voiceMask;
++    static char   m_credit[180];
++
++public:
++    ReSID  (sidbuilder *builder);
++    ~ReSID (void);
++
++    // Standard component functions
++    const char   *credits (void) {return m_credit;}
++    void          reset   () { sidemu::reset (); }
++    void          reset   (uint8_t volume);
++    uint8_t       read    (uint_least8_t addr);
++    void          write   (uint_least8_t addr, uint8_t data);
++    const char   *error   (void) {return m_error;}
++
++    // Standard SID functions
++    void          clock   ();
++    void          filter  (bool enable);
++    void          voice   (uint_least8_t num, bool mute);
++
++    operator bool () { return m_status; }
++    static   int  devices (char *error);
++
++    // Specific to resid
++    void sampling (float systemclock, float freq,
++    const sampling_method_t method, const bool fast);
++    //bool filter   (const sid_filter_t *filter); //FIXME remove?
++    void bias     (const double dac_bias);
++    void model    (sid2_model_t model);
++    // Must lock the SID before using the standard functions.
++    bool lock     (c64env *env);
++};
+diff -Naur libsidplayfp-0.3.4-origin/builders/resid-builder/resid.h libsidplayfp-0.3.4/builders/resid-builder/resid.h
+--- libsidplayfp-0.3.4-origin/builders/resid-builder/resid.h	2011-09-18 11:30:04.000000000 +0200
++++ libsidplayfp-0.3.4/builders/resid-builder/resid.h	2012-04-25 17:29:41.000000000 +0200
+@@ -30,7 +30,7 @@
+ */
+ class SID_EXTERN ReSIDBuilder: public sidbuilder
+ {
+-protected:
++public:
+     std::vector<sidemu *> sidobjs;
+ 
+ private:
+diff -Naur libsidplayfp-0.3.4-origin/Makefile.am libsidplayfp-0.3.4/Makefile.am
+--- libsidplayfp-0.3.4-origin/Makefile.am	2012-02-14 22:17:18.000000000 +0100
++++ libsidplayfp-0.3.4/Makefile.am	2012-05-06 16:42:41.000000000 +0200
+@@ -235,7 +235,17 @@
+ 
+ builders_resid_builder_libsidplayfp_resid_ladir = $(includedir)/sidplayfp/builders
+ builders_resid_builder_libsidplayfp_resid_la_HEADERS = \
+-builders/resid-builder/resid.h
++builders/resid-builder/resid.h \
++builders/resid-builder/resid-emu.h \
++builders/resid-builder/resid/sid.h \
++builders/resid-builder/resid/siddefs.h \
++builders/resid-builder/resid/resid-config.h \
++builders/resid-builder/resid/voice.h \
++builders/resid-builder/resid/filter.h \
++builders/resid-builder/resid/extfilt.h \
++builders/resid-builder/resid/pot.h \
++builders/resid-builder/resid/wave.h \
++builders/resid-builder/resid/envelope.h
+ 
+ builders_resid_builder_libsidplayfp_resid_la_SOURCES = \
+ builders/resid-builder/resid.cpp \
+diff -Naur libsidplayfp-0.3.4-origin/Makefile.in libsidplayfp-0.3.4/Makefile.in
+--- libsidplayfp-0.3.4-origin/Makefile.in	2012-03-24 11:33:53.000000000 +0100
++++ libsidplayfp-0.3.4/Makefile.in	2012-05-06 16:42:45.000000000 +0200
+@@ -627,7 +627,17 @@
+ builders_residfp_builder_libsidplayfp_residfp_la_LDFLAGS = -version-info $(LIBRESIDFPVERSION)
+ builders_resid_builder_libsidplayfp_resid_ladir = $(includedir)/sidplayfp/builders
+ builders_resid_builder_libsidplayfp_resid_la_HEADERS = \
+-builders/resid-builder/resid.h
++builders/resid-builder/resid.h \
++builders/resid-builder/resid-emu.h \
++builders/resid-builder/resid/sid.h \
++builders/resid-builder/resid/siddefs.h \
++builders/resid-builder/resid/resid-config.h \
++builders/resid-builder/resid/voice.h \
++builders/resid-builder/resid/filter.h \
++builders/resid-builder/resid/extfilt.h \
++builders/resid-builder/resid/pot.h \
++builders/resid-builder/resid/wave.h \
++builders/resid-builder/resid/envelope.h
+ 
+ builders_resid_builder_libsidplayfp_resid_la_SOURCES = \
+ builders/resid-builder/resid.cpp \
