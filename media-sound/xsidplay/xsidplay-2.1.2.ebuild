@@ -12,8 +12,7 @@ LICENSE="GPL"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE="+sidplay2 sidplayfp sdl alsa"
-DEPEND="kde-base/kdebase-meta:4
-		sidplayfp? ( media-libs/libsidplayfp[static-libs] )
+DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs] )
 		sidplay2? ( media-libs/libsidplay:2 
 					media-libs/resid )
 		sdl? ( media-libs/libsdl )
