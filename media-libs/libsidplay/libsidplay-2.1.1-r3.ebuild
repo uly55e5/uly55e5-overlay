@@ -14,7 +14,7 @@ SRC_URI="mirror://sourceforge/sidplay2/${MY_P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="2"
 KEYWORDS="alpha amd64 hppa ia64 ~mips ppc ppc64 sparc x86 ~x86-fbsd"
-IUSE=""
+IUSE="cia"
 
 RDEPEND=""
 DEPEND=""
@@ -24,8 +24,10 @@ S=${WORKDIR}/${MY_P}
 src_prepare() {
 	epatch "${FILESDIR}"/libsidplay2-gcc41.patch \
 		"${FILESDIR}"/${P}-fbsd.patch \
-		"${FILESDIR}"/${P}-gcc43.patch \
-		"${FILESDIR}"/${P}-cia1.patch
+		"${FILESDIR}"/${P}-gcc43.patch 
+	if use cia; then 
+		epatch "${FILESDIR}"/${P}-cia1.patch
+	fi
 	elibtoolize
 }
 

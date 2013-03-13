@@ -12,13 +12,15 @@ SRC_URI="mirror://sourceforge/sidplay-residfp/${P}.tar.gz"
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="static-libs"
+IUSE="static-libs cia"
 
 DOCS=( AUTHORS NEWS README TODO )
 
 src_prepare() {
-	epatch ${FILESDIR}/cia1.patch || die 
-	epatch ${FILESDIR}/resid.patch || die
+	if use cia; then
+		epatch ${FILESDIR}/cia1.patch || die 
+		epatch ${FILESDIR}/resid.patch || die
+	fi
 	# fix automagic. warning: modifying .ac triggers maintainer mode.
 	sed -i -e 's:doxygen:dIsAbLe&:' configure || die
 }
