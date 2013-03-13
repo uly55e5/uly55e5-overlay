@@ -14,7 +14,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE="sidplay2 +sidplayfp sdl alsa"
 DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs,cia] )
 		sidplay2? ( media-libs/libsidplay:2[cia] 
-					media-libs/residi
+					media-libs/resid
 					media-libs/libsidplay:1 )
 		sdl? ( media-libs/libsdl )
 		alsa? ( media-libs/alsa-lib )
