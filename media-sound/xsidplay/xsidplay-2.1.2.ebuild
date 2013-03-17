@@ -19,7 +19,8 @@ DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs,cia] )
 		sdl? ( media-libs/libsdl )
 		alsa? ( media-libs/alsa-lib )
 		dev-qt/qtgui
-		dev-qt/qtsql"
+		dev-qt/qtsql
+		kde-base/kdelibs:4"
 S=${WORKDIR}/${PN}
 
 src_unpack() {
