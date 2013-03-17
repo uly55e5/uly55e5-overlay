@@ -11,14 +11,15 @@ SRC_URI="mirror://sourceforge/xsidplay2/${P}.tar.gz"
 LICENSE="GPL"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="+sidplay2 sidplayfp sdl alsa"
-DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs] )
-		sidplay2? ( media-libs/libsidplay:2 
-					media-libs/resid )
+IUSE="sidplay2 +sidplayfp sdl alsa"
+DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs,cia] )
+		sidplay2? ( media-libs/libsidplay:2[cia] 
+					media-libs/resid
+					media-libs/libsidplay:1 )
 		sdl? ( media-libs/libsdl )
 		alsa? ( media-libs/alsa-lib )
-		dev-qt/qt-meta
-		kde-base/kdelibs:4"
+		dev-qt/qtgui
+		dev-qt/qtsql"
 S=${WORKDIR}/${PN}
 
 src_unpack() {
@@ -33,15 +34,10 @@ src_unpack() {
 }
 
 src_configure() {
-	if (use sidplay2 && use sidplayfp) ; then
-		die "Only one of the useflags sidplay2 or sidplaypfp should be set!"
-	fi
-	if !(use sidplay2 || use sidplayfp); then
-		die "Use sidplay2 or sidplayfp!"
-	fi
 	mycmakeargs=( 
 		$(cmake-utils_use_with tsid)
 		$(cmake-utils_use_with tsid2)
+		$(cmake-utils_use_with sidplay1)
 		$(cmake-utils_use_with sidplay2)
 		$(cmake-utils_use_with sidplayfp)
 	)
