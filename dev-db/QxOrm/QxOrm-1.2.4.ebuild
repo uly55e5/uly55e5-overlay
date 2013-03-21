@@ -13,7 +13,7 @@ SRC_URI="mirror://sourceforge/qxorm/QxOrm_1.2.4.zip"
 LICENSE="LGPL"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="debug"
+IUSE="doc debug"
 
 DEPEND="dev-libs/boost[debug?]
 		 dev-qt/qtsql[debug?]
@@ -21,10 +21,16 @@ DEPEND="dev-libs/boost[debug?]
 		 dev-qt/qtcore[debug?]"
 RDEPEND="${DEPEND}"
 
-HTML_DOCS="doc/"
 S="${WORKDIR}/${PN}"
 
 src_configure() {
 	eqmake4 PREFIX="/usr"
+}
+
+src_install() {
+	if use doc; then
+		dohtml -r "${S}/doc"
+	fi
+	qt4-r2_src_install
 }
 
