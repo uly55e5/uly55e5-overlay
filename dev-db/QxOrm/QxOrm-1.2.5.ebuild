@@ -38,6 +38,5 @@ src_install() {
 		dodoc -r ${S}/test/* || die
 		docompress -x /usr/share/doc/${PF}/examples
 	fi
-	rm -r ${D}/usr/inl
 }
 
