@@ -8,12 +8,12 @@ inherit qt4-r2
 
 DESCRIPTION="C++ library designed to provide Object Relational Mapping (ORM) feature."
 HOMEPAGE="ihttp://www.qxorm.com"
-SRC_URI="mirror://sourceforge/qxorm/QxOrm_1.2.4.zip"
+SRC_URI="http://www.qxorm.com/version/${PN}_${PV}.zip"
 
-LICENSE="LGPL"
+LICENSE="GPL3"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE="doc debug"
+IUSE="doc debug examples"
 
 DEPEND="dev-libs/boost[debug?]
 		 dev-qt/qtsql[debug?]
@@ -24,13 +24,19 @@ RDEPEND="${DEPEND}"
 S="${WORKDIR}/${PN}"
 
 src_configure() {
-	eqmake4 PREFIX="/usr"
+	eqmake4 PREFIX="/usr" || die
 }
 
 src_install() {
-	if use doc; then
-		dohtml -r "${S}/doc"
-	fi
 	qt4-r2_src_install
+	dodoc changes.txt 
+	if use doc; then
+		dohtml -r ${S}/doc/* || die
+	fi
+	if use examples; then
+		docinto examples
+		dodoc -r ${S}/test/* || die
+		docompress -x /usr/share/doc/${PF}/examples
+	fi
 }
 
