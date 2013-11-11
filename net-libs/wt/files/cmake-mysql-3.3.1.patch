@@ -1,0 +1,19 @@
+--- cmake/WtFindMysql.txt.old	2013-11-11 17:21:10.681526022 +0100
++++ cmake/WtFindMysql.txt	2013-11-11 17:21:37.529525093 +0100
+@@ -17,7 +17,7 @@
+     /usr/local/include/mysql
+ )
+ 
+-SET(MYSQL_LIBRARY mariadb libmariadb mariadbclient mysqlclient libmysql CACHE STRING "Library that provides MySQL/MariaDB API (set to mysqlclient for mysql on unix; libmysql on windows)")
++SET(MYSQL_LIBRARY mariadb libmariadb mariadbclient mysql mysqlclient libmysql CACHE STRING "Library that provides MySQL/MariaDB API (set to mysqlclient for mysql on unix; libmysql on windows)")
+ FOREACH(l ${MYSQL_LIBRARY})
+   LIST(APPEND MYSQL_DEBUG_LIBRARY "${l}d")
+ ENDFOREACH()
+@@ -31,6 +31,7 @@
+     /usr/lib
+     /usr/local/lib
+     /opt/local/lib
++    /usr/lib/mysql
+ )
+ 
+ FIND_LIBRARY(MYSQL_DEBUG_LIB
