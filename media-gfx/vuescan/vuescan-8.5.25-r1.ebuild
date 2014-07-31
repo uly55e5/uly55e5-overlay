@@ -35,7 +35,6 @@ src_install() {
 	doexe vuescan
 	make_wrapper vuescan /opt/vuescan/vuescan
 	dodoc vuescan.bmp vuescan.htm
-	dohtml -r html/*
 	dosym /usr/share/doc/${PF}/html /opt/vuescan/html
 	dosym /usr/share/doc/${PF}/vuescan.htm /opt/vuescan/vuescan.htm
 	make_desktop_entry vuescan VueScan vuescan.bmp \
