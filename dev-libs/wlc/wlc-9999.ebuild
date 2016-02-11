@@ -15,7 +15,7 @@ EGIT_REPO_URI=https://github.com/Cloudef/wlc.git
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~amd64"
 IUSE="dbus systemd"
 
 DEPEND="systemd? ( sys-apps/systemd )
