@@ -19,7 +19,8 @@ RDEPEND="dev-libs/jsoncpp
 		net-libs/liboauth
 		net-misc/curl
 		dev-libs/boost
-		dev-libs/tinyxml
+		dev-libs/tinyxml2
+		app-crypt/rhash
 		dev-cpp/htmlcxx"
 DEPEND="${RDEPEND}"
 
