@@ -1,7 +1,7 @@
 # Copyright 1999-2009 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI="4"
+EAPI=6
 
 inherit eutils cmake-utils
 
@@ -26,8 +26,8 @@ BUILD_DIR=${WORKDIR}/${P}/build
 
 src_configure() {
 	mycmakeargs=( 
-		$(cmake-utils_use_with sidplay2)
-		$(cmake-utils_use_with sidplayfp)
+		-DSID_WITH_SIDPLAY2=$(usex sidplay2)
+		-DSID_WITH_SIDPLAYFP=$(usex sidplayfp)
 	)
 	cmake-utils_src_configure
 }
