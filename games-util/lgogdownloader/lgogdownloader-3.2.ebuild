@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Header: lgogdownloader-2.4.ebuild,v 1.0 2013/04/28 10:15:41 by frostwork Exp $
 
-EAPI="4"
+EAPI=6
 
 inherit eutils cmake-utils
 
@@ -19,7 +19,8 @@ RDEPEND="dev-libs/jsoncpp
 		net-libs/liboauth
 		net-misc/curl
 		dev-libs/boost
-		dev-libs/tinyxml
+		dev-libs/tinyxml2
+		app-crypt/rhash
 		dev-cpp/htmlcxx"
 DEPEND="${RDEPEND}"
 
