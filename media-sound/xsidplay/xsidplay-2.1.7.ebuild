@@ -20,7 +20,7 @@ DEPEND="sidplayfp? ( media-libs/libsidplayfp[static-libs] )
 		alsa? ( media-libs/alsa-lib )
 		dev-qt/qtgui
 		dev-qt/qtsql
-		kde-base/kdelibs:4"
+		kde-frameworks/kdelibs:4"
 
 BUILD_DIR=${WORKDIR}/${P}/build
 
